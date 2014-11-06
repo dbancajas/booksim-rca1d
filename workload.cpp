@@ -61,6 +61,7 @@ Workload * Workload::New(string const & workload, int nodes,
   } else {
     param_str = workload.substr(left+1, right-left-1);
   }
+  cout<<"param str:"<<param_str<<endl;
   vector<string> params = tokenize_str(param_str);
   
   Workload * result = NULL;
@@ -110,7 +111,7 @@ Workload * Workload::New(string const & workload, int nodes,
     string const & filename = params[0];
     int channel_width = config ? (config->GetInt("channel_width")) : 128;
     int size_offset = 0;
-    int region = -1;
+    int region = 2;
     long long int limit = -1;
     int scale = 1;
     bool enforce_deps = false;
@@ -133,6 +134,11 @@ Workload * Workload::New(string const & workload, int nodes,
 	}
       }
     }
+    cout<<"param size:"<<params.size()<<endl;
+    cout<<"using load:"<<params[0]<<endl;
+    cout<<"using limit:"<<limit<<endl;
+    cout<<"using scale:"<<scale<<endl;
+    cout<<"using region:"<<region<<endl;
     result = new NetraceWorkload(nodes, filename, channel_width, limit, scale, region, enforce_deps, enforce_lats, size_offset);
   }
   return result;

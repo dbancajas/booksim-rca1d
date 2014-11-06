@@ -30,7 +30,8 @@
 // Topology
 
 sim_type=workload;
-workload=netrace({/benchmarks/netrace/blackscholes.bz2});
+//workload=netrace({/benchmarks/netrace/blackscholes.bz2},-1,1,2,4);
+workload=netrace({/benchmarks/netrace/blackscholes.bz2},-1,8,2,5);
 
 
 topology = mesh;
@@ -64,5 +65,5 @@ print_activity=1;
 //NSFTR modeling
 nsftr = 1;
 faulty = 1;
-fault_rate = 0.1;
+fault_rate = 0.2;
 nsftr_debug = 0;
