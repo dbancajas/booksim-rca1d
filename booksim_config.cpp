@@ -306,6 +306,12 @@ BookSimConfig::BookSimConfig( )
   _int_map["faulty"] = 0;
   _float_map["fault_rate"] = 0.0;
   _int_map["nsftr_debug"] = 0;
+
+
+  //====RCA 1D====
+  _int_map["rca1d_debug"] = 0; 
+  
+  //
 }
 
 PowerConfig::PowerConfig( )

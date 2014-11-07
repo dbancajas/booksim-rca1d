@@ -703,6 +703,157 @@ void nsftr_mesh( const Router *r, const Flit *f, int in_channel, OutputSet *outp
 }
 
 
+//obtains the list of routers in the +X or -X direction for congestion analysis
+//0 - +x port
+//1 - -x port
+//2 - +y port
+//3 - -y  port
+//4 - ejection/injection channel, Local PE
+//
+//
+
+void getRCA_RouterList(vector<int>& xlist, vector<int>& ylist, int rID, int dest){ 
+
+  assert(rID != dest); //no sense in calling this when flit has arrived
+  xlist.clear();
+  ylist.clear();
+
+  int radix = 8;
+  int dim = 2;
+
+
+  int xcol_dest = dest % radix;
+  int xcol_src = rID % radix;
+
+  if (xcol_dest > xcol_src){//dest is at the right of src
+	for (int i = 1; i <= xcol_dest - xcol_src; i++){
+		xlist.push_back(rID + i);
+		assert((rID + i) % radix > xcol_src);
+	}
+  }
+  else {
+	for (int i = 1; i <= xcol_src - xcol_dest; i++){
+		xlist.push_back(rID - i);
+		assert(((rID - i) % radix) < xcol_src);
+	}
+  }
+
+  int ycol_dest = dest / radix;
+  int ycol_src = rID / radix;
+
+  if (ycol_dest > ycol_src){ //dest is above source
+	for(int i=1; i<= ycol_dest - ycol_src; i++){
+		ylist.push_back(rID + radix * i);
+		assert((rID + radix * i)/radix > ycol_src );
+	}
+  }
+  else {	
+	for(int i=1; i<= ycol_src - ycol_dest; i++){
+		ylist.push_back(rID - radix * i);
+		assert((rID - radix * i)/radix < ycol_src );
+	}
+  }
+
+}
+
+int getReceivingInputPort(int outport){
+	if(outport == 0)
+		return 1;
+	else if (outport == 1)
+		return 0;
+	else if (outport == 2)
+		return 3;
+	else if (outport == 3)
+		return 2;
+	else 
+		assert(0); //this shouldn't be called or something's wrong??
+}
+
+
+void rca1d_mesh( const Router *r, const Flit *f, int in_channel, OutputSet *outputs, bool inject )
+{
+
+  int out_port_xy = inject ? -1 : dor_next_mesh( r->GetID( ), f->dest, false );
+  int out_port_yx = inject ? -1 : dor_next_mesh( r->GetID( ), f->dest, true );
+
+  int out_port = -1000;
+
+  vector<int> xlist;
+  vector<int> ylist;
+
+  if (out_port_xy != out_port_yx){ //this is when you call the congestion analyzer
+	
+	getRCA_RouterList(xlist,ylist,r->GetID(),f->dest);
+	float xdir_occupancy=0.0;
+	float ydir_occupancy=0.0;
+
+	int in_xy = getReceivingInputPort(out_port_xy);
+	int in_yx = getReceivingInputPort(out_port_yx);
+
+	//Get the average occupancy of the buffers in each router
+
+//	if(r->rca1d_debug)	
+//		*gWatchOut<<"in_xy:"<<in_xy<<" in_yx:"<<in_yx<<endl;
+
+	Network* Net = dynamic_cast<Network*>(r->Net);
+	const vector<Router *>& rtrs  = Net->GetRouters();
+
+	for (int i=0; i < xlist.size(); i++){
+		xdir_occupancy +=  rtrs[xlist[i]]->GetBufferOccupancy(in_xy);
+	}
+
+	for (int i=0; i < ylist.size(); i++){
+		ydir_occupancy +=  rtrs[ylist[i]]->GetBufferOccupancy(in_yx);
+	}
+	//average
+	xdir_occupancy = xdir_occupancy/xlist.size();
+	ydir_occupancy = ydir_occupancy/ylist.size();
+
+	/*if ( !inject && f->watch ) {
+		*gWatchOut<<"xdir_occ: "<<xdir_occupancy
+		<<"ydir_occ:"<<ydir_occupancy
+		<<endl;
+	}*/
+
+	out_port = (xdir_occupancy <= ydir_occupancy)? out_port_xy:out_port_yx;
+	
+  }
+  else { // flit is in same column or row as dest
+	out_port = out_port_xy;
+  }
+
+
+  //if(out_port_xy == -1 && out_port_yx == -1)
+//	out_port = -1;
+
+  assert(out_port != -1000);
+  
+  int vcBegin = gBeginVCs[f->cl];
+  int vcEnd = gEndVCs[f->cl];
+  assert(((f->vc >= vcBegin) && (f->vc <= vcEnd)) || (inject && (f->vc < 0)));
+
+  if ( !inject && f->watch ) {
+    *gWatchOut << GetSimTime() << " | " << r->FullName() << " | "
+	       << "Adding VC range [" 
+	       << vcBegin << "," 
+	       << vcEnd << "]"
+	       << " at output port " << out_port
+	       << " for flit " << f->id
+	       << " (input port " << in_channel
+	       << ", destination " << f->dest << ")"
+	       << " routerID: "<< r->GetID()
+	       << " outport_xy: "<< out_port_xy
+	       << " outport_yx: "<< out_port_yx
+	       << "." << endl;
+  }
+
+  outputs->Clear();
+
+  outputs->AddRange( out_port, vcBegin, vcEnd );
+
+
+}
+
 void dim_order_mesh( const Router *r, const Flit *f, int in_channel, OutputSet *outputs, bool inject )
 {
   int out_port = inject ? -1 : dor_next_mesh( r->GetID( ), f->dest );
@@ -1865,4 +2016,9 @@ void InitializeRoutingMap( const Configuration & config )
 
   //NSFTR dean
   gRoutingFunctionMap["nsftr_mesh"] = &nsftr_mesh;
+
+  //RCA-1D dean
+  gRoutingFunctionMap["rca1d_mesh"] = &rca1d_mesh;
+
+
 }

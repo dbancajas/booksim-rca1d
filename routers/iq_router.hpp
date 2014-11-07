@@ -116,6 +116,7 @@ class IQRouter : public Router {
 
   void GenerateRandomFaults( );
 
+
 #ifdef TRACK_FLOWS
   vector<vector<queue<int> > > _outstanding_classes;
 #endif
@@ -192,6 +193,11 @@ public:
   inline void incNLcnt(){NL_flitcnt++;}
   inline void incSLcnt(){SL_flitcnt++;}
 
+
+//rca1d dean
+  bool rca1d_debug;
+
+  
 };
 
 #endif

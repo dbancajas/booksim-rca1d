@@ -42,6 +42,7 @@
 #include <iostream>
 #include <cassert>
 #include "router.hpp"
+#include "network.hpp"
 
 //////////////////Sub router types//////////////////////
 #include "iq_router.hpp"
@@ -85,6 +86,8 @@ TimedModule( parent, name ), _id( id ), _inputs( inputs ), _outputs( outputs ),
   _crossbar_conflict_stalls.resize(_classes, 0);
 #endif
 
+   //rca1d
+   Net = dynamic_cast<Network *>(parent);
 }
 
 void Router::AddInputChannel( FlitChannel *channel, CreditChannel *backchannel )

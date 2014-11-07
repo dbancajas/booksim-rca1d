@@ -185,6 +185,9 @@ IQRouter::IQRouter( Configuration const & config, Module *parent,
  fault_rate = (int) (100*config.GetFloat("fault_rate"));
  nsftr_debug = config.GetInt("nsftr_debug");
 
+  //rca1d
+ rca1d_debug = config.GetInt("rca1d_debug");
+
  if (faulty){
 	assert(_outputs>1);
   	_fault_bits.resize(_outputs-1,false);

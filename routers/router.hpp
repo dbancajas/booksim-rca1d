@@ -30,6 +30,7 @@
 
 #include <string>
 #include <vector>
+#include "network.hpp"
 
 #include "timed_module.hpp"
 #include "flit.hpp"
@@ -197,6 +198,9 @@ public:
 
   inline int NumInputs() const {return _inputs;}
   inline int NumOutputs() const {return _outputs;}
+
+   //rca1d
+   Network * Net;
 };
 
 #endif

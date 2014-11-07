@@ -1,0 +1,10 @@
+
+1. To run RCA-1D algorithm, uncomment the corresponding routing function in mesh88_rca1d
+2. The mesh88_rca1d script is to be used by analysis.sh
+3. The analysis.sh script will run a parametric analysis, changing the injection rate.
+4. The code for the RCA-1D routing algo is in routefunc.cpp:rca1d_mesh() function.
+
+Note that the RCA-1D in this implementation takes the congestion in each dimension, X and Y for the
+possible paths of the flit. The congestion metric used is the occupancy of the buffer in the 
+particular input. All congestion info are gathered and average. The path with the lower congestion
+value is then chosen as the path.

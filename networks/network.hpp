@@ -112,6 +112,8 @@ public:
   const vector<Router *> & GetRouters(){return _routers;}
   Router * GetRouter(int index) {return _routers[index];}
   int NumRouters() const {return _size;}
+
+  //inline const Router * getRouterPtr(int i) { return _routers[i]; }
 };
 
 #endif 

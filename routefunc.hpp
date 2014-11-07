@@ -35,6 +35,8 @@
 #include "router.hpp"
 #include "outputset.hpp"
 #include "config_utils.hpp"
+#include "anynet.hpp"
+#include "network.hpp"
 
 typedef void (*tRoutingFunction)( const Router *, const Flit *, int in_channel, OutputSet *, bool );
 
