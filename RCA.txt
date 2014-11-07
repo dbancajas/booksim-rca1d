@@ -8,3 +8,7 @@ Note that the RCA-1D in this implementation takes the congestion in each dimensi
 possible paths of the flit. The congestion metric used is the occupancy of the buffer in the 
 particular input. All congestion info are gathered and average. The path with the lower congestion
 value is then chosen as the path.
+
+I have tried running this and the performance is similar to XY routing. But I
+only ran it on hotspot traffic and uniform. It might need extensive testing or
+optimization/tuning to achieve the same performance with the RCA paper.
